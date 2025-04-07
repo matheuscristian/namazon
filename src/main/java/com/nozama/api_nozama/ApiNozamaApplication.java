@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ApiUsiminasApplication {
+public class ApiNozamaApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ApiUsiminasApplication.class, args);
+		SpringApplication.run(ApiNozamaApplication.class, args);
 	}
 
 }
