@@ -1,4 +1,4 @@
-package com.amazon.api_amazon;
+package com.nozama.api_nozama;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
