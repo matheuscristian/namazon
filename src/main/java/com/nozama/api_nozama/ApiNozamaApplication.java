@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class ApiNozamaApplication {
-
 	private static Connection conn = null;
 
 	public static void main(String[] args) {
