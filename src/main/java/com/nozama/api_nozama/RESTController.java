@@ -223,6 +223,22 @@ public class RESTController {
         });
     }
 
+    @GetMapping("/categoria")
+    public List<Categoria> getAllCategories() {
+        String query = "SELECT * FROM Categoria";
+        return executeQuery(query, pstmt -> {
+            try (ResultSet rs = pstmt.executeQuery()) {
+                List<Categoria> categories = new ArrayList<>();
+                while (rs.next()) {
+                    categories.add(new Categoria(
+                            rs.getInt("CategoriaID"),
+                            rs.getString("Nome")));
+                }
+                return categories;
+            }
+        });
+    }
+
     @GetMapping("/categoria/{id}")
     public Categoria getCategoria(@PathVariable Integer id) {
         String query = "SELECT * FROM Categoria WHERE CategoriaID = ?";
@@ -256,6 +272,55 @@ public class RESTController {
                 return null;
             }
         });
+    }
+
+    @PostMapping("/estoque")
+    public ResponseEntity<Estoque> createEstoque(@RequestBody Estoque newEstoque) {
+        String insertQuery = """
+                INSERT INTO Estoque
+                (ProdutoID, Quantidade)
+                VALUES (?, ?)
+                """;
+
+        try (PreparedStatement pstmt = ApiNozamaApplication.getConn().prepareStatement(
+                insertQuery,
+                PreparedStatement.RETURN_GENERATED_KEYS)) {
+
+            pstmt.setInt(1, newEstoque.getProdutoID());
+            pstmt.setInt(2, newEstoque.getQuantidade());
+
+            int affectedRows = pstmt.executeUpdate();
+
+            if (affectedRows == 0) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int newId = generatedKeys.getInt(1);
+
+                    // Return the complete stock entry
+                    String selectQuery = "SELECT * FROM Estoque WHERE EstoqueID = ?";
+                    try (PreparedStatement selectStmt = ApiNozamaApplication.getConn().prepareStatement(selectQuery)) {
+                        selectStmt.setInt(1, newId);
+                        try (ResultSet rs = selectStmt.executeQuery()) {
+                            if (rs.next()) {
+                                Estoque createdEstoque = new Estoque(
+                                        newId,
+                                        rs.getInt("ProdutoID"),
+                                        rs.getInt("Quantidade"));
+                                return ResponseEntity.status(HttpStatus.CREATED).body(createdEstoque);
+                            }
+                        }
+                    }
+                }
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @GetMapping("/pagamento/{id}")
